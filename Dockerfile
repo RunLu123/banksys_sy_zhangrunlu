@@ -1,7 +1,9 @@
 ARG PYTHON_VERSION=3.11
-ARG PIP_INDEX_URL=https://pypi.org/simple
 
 FROM python:${PYTHON_VERSION}-slim
+
+# ARG 必须在 FROM 之后重新声明，才能在构建阶段内使用
+ARG PIP_INDEX_URL=https://pypi.org/simple
 
 WORKDIR /app
 
@@ -12,7 +14,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # 安装 Python 依赖
 COPY requirements.txt .
-RUN pip install --no-cache-dir --timeout 120 -i "${PIP_INDEX_URL}" -r requirements.txt
+RUN pip install --no-cache-dir --timeout 120 -i ${PIP_INDEX_URL} -r requirements.txt
 
 # 复制项目代码与数据
 COPY data/ ./data/
