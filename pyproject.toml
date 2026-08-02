@@ -1,0 +1,14 @@
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-v"
+
+[tool.coverage.run]
+source = ["src"]
+omit = [
+    "src/pages/*",
+    "src/app.py",
+]
+
+[tool.coverage.report]
+fail_under = 80

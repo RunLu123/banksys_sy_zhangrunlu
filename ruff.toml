@@ -1,0 +1,8 @@
+line-length = 100
+
+[lint]
+# Streamlit 多页面要求 <number>_<emoji>_<name>.py 命名
+extend-ignore = ["N999"]
+
+[lint.per-file-ignores]
+"tests/*.py" = ["S101"]
