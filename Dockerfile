@@ -1,0 +1,41 @@
+ARG PYTHON_VERSION=3.11
+ARG PIP_INDEX_URL=https://pypi.org/simple
+
+FROM python:${PYTHON_VERSION}-slim
+
+WORKDIR /app
+
+# 安装系统依赖
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# 安装 Python 依赖
+COPY requirements.txt .
+RUN pip install --no-cache-dir --timeout 120 -i "${PIP_INDEX_URL}" -r requirements.txt
+
+# 复制项目代码与数据
+COPY data/ ./data/
+COPY src/ ./src/
+COPY models/ ./models/
+
+# 离线训练模型（构建时完成）
+RUN python -c "
+import sys; sys.path.insert(0, '.')
+from src.data_loader import load_train_data, preprocess
+from src.model import train_and_save
+import os
+os.makedirs('models', exist_ok=True)
+df = load_train_data()
+X, y, preprocessor = preprocess(df, training=True)
+train_and_save(X, y, preprocessor, 'models/')
+print('Model training completed.')
+"
+
+# Streamlit 默认端口 8501，映射到 8888
+EXPOSE 8888
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+    CMD curl -fsS http://localhost:8888/_stcore/health || exit 1
+
+CMD ["streamlit", "run", "src/app.py", "--server.port=8888", "--server.address=0.0.0.0"]
