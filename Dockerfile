@@ -20,17 +20,7 @@ COPY src/ ./src/
 COPY models/ ./models/
 
 # 离线训练模型（构建时完成）
-RUN python -c "
-import sys; sys.path.insert(0, '.')
-from src.data_loader import load_train_data, preprocess
-from src.model import train_and_save
-import os
-os.makedirs('models', exist_ok=True)
-df = load_train_data()
-X, y, preprocessor = preprocess(df, training=True)
-train_and_save(X, y, preprocessor, 'models/')
-print('Model training completed.')
-"
+RUN python src/train.py
 
 # Streamlit 默认端口 8501，映射到 8888
 EXPOSE 8888
